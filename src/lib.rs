@@ -190,6 +190,5 @@ impl Board {
         }
 
         self.gen_new_number();
-        // just a comment for pushing
     }
 }
