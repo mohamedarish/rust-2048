@@ -1,3 +1,9 @@
+use rust2048::{Board, Move};
+
 fn main() {
-    println!("Hello World");
+    let mut b = Board::new();
+
+    b.print_board();
+
+    b.make_move(Move::Up);
 }
