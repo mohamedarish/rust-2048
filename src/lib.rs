@@ -70,6 +70,15 @@ impl Board {
         self.tiles[rand_pos as usize] = current_tile;
     }
 
+    fn merge(&mut self, m: Move) {
+        match m {
+            Move::Up => {}
+            Move::Left => {}
+            Move::Down => {}
+            Move::Right => {}
+        }
+    }
+
     pub fn print_board(self) {
         for i in 0..4 {
             print!("|\t");
