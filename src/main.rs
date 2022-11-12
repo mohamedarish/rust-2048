@@ -5,5 +5,27 @@ fn main() {
 
     b.print_board();
 
-    b.make_move(Move::Up);
+    // b.make_move(Move::Left);
+
+    // println!();
+
+    // b.print_board();
+
+    // b.make_move(Move::Up);
+
+    // println!();
+
+    // b.print_board();
+
+    // b.make_move(Move::Down);
+
+    // println!();
+
+    // b.print_board();
+
+    b.make_move(Move::Right);
+
+    println!();
+
+    b.print_board();
 }

@@ -1,18 +1,18 @@
-use std::vec;
+use std::{ops::Index, vec};
 
 use rand::Rng;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Board {
-    pub tiles: Vec<Tile>,
-    score: i32,
-}
-
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct Tile {
     x: i32,
     y: i32,
     pub num: i32,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Board {
+    pub tiles: [Tile; 16],
+    pub score: i32,
 }
 
 pub enum Move {
@@ -32,7 +32,7 @@ impl Board {
     pub fn new() -> Self {
         let mut rng = rand::thread_rng();
         let rand_start = rng.gen_range(0..16);
-        let mut tile_place: Vec<Tile> = Vec::new();
+        let mut tile_array = [Tile { x: 0, y: 0, num: 0 }; 16];
 
         for i in 0..16 {
             let mut current_tile = Tile {
@@ -49,11 +49,11 @@ impl Board {
                 };
             }
 
-            tile_place.append(&mut vec![current_tile]);
+            tile_array[i as usize] = current_tile;
         }
 
         Board {
-            tiles: tile_place,
+            tiles: tile_array,
             score: 0,
         }
     }
@@ -75,26 +75,100 @@ impl Board {
         }
     }
 
-    pub fn make_move(&mut self, m: Move) {
+    pub fn make_move(&mut self, m: Move) -> &mut Board {
         match m {
             Move::Up => {
-                let mut indexes: Vec<Vec<usize>> = vec![vec![], vec![], vec![], vec![]];
-
+                let mut indexes = [[0; 4]; 4];
+                let mut ind = [0; 4];
                 for i in 0..16 {
                     if self.tiles[i].num > 0 {
-                        indexes[i % 4].append(&mut vec![i]);
+                        indexes[i % 4][ind[i % 4]] = i + 1;
+                        ind[i % 4] += 1;
                     }
                 }
 
-                for i in indexes {
-                    for j in &i {
-                        self.tiles.swap(*j, 4 - &i.len());
+                for i in 0..indexes.len() {
+                    let mut index = 0;
+                    for j in indexes[i] {
+                        if j != 0 {
+                            let old_num = self.tiles[index * 3 + i].num;
+                            self.tiles[index * 4 + i].num = self.tiles[j - 1].num;
+                            self.tiles[j - 1].num = old_num;
+                            index += 1;
+                        }
                     }
                 }
             }
-            Move::Left => {}
-            Move::Down => {}
-            Move::Right => {}
+            Move::Left => {
+                let mut indexes = [[0; 4]; 4];
+                let mut ind = [0; 4];
+
+                for i in 0..16 {
+                    if self.tiles[i].num > 0 {
+                        indexes[(i - i % 4) / 4][ind[i % 4]] = i + 1;
+                        ind[i % 4] += 1;
+                    }
+                }
+
+                for i in 0..indexes.len() {
+                    let mut index = 0;
+                    for j in indexes[i] {
+                        if j != 0 {
+                            let old_num = self.tiles[i * 4 + index].num;
+                            self.tiles[i * 4 + index].num = self.tiles[j - 1].num;
+                            self.tiles[j - 1].num = old_num;
+                            index += 1;
+                        }
+                    }
+                }
+            }
+            Move::Down => {
+                let mut indexes = [[0; 4]; 4];
+                let mut ind = [0; 4];
+                for i in 0..16 {
+                    if self.tiles[i].num > 0 {
+                        indexes[i % 4][ind[i % 4]] = i + 1;
+                        ind[i % 4] += 1;
+                    }
+                }
+
+                for i in 0..indexes.len() {
+                    let mut index = 3;
+                    for j in indexes[i] {
+                        if j != 0 {
+                            let old_num = self.tiles[index * 4 + i].num;
+                            self.tiles[index * 4 + i].num = self.tiles[j - 1].num;
+                            self.tiles[j - 1].num = old_num;
+                            index -= 1;
+                        }
+                    }
+                }
+            }
+            Move::Right => {
+                let mut indexes = [[0; 4]; 4];
+                let mut ind = [0; 4];
+
+                for i in 0..16 {
+                    if self.tiles[i].num > 0 {
+                        indexes[(i - i % 4) / 4][ind[i % 4]] = i + 1;
+                        ind[i % 4] += 1;
+                    }
+                }
+
+                for i in 0..indexes.len() {
+                    let mut index = 3;
+                    for j in indexes[i] {
+                        if j != 0 {
+                            let old_num = self.tiles[i * 4 + index].num;
+                            self.tiles[i * 4 + index].num = self.tiles[j - 1].num;
+                            self.tiles[j - 1].num = old_num;
+                            index -= 1;
+                        }
+                    }
+                }
+            }
         }
+
+        self
     }
 }
