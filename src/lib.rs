@@ -188,7 +188,6 @@ impl Board {
                 }
             }
         }
-        // new comment
 
         self.gen_new_number();
     }
