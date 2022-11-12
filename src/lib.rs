@@ -1,5 +1,3 @@
-use std::{ops::Index, vec};
-
 use rand::Rng;
 
 #[derive(Debug, Copy, Clone)]
@@ -30,32 +28,46 @@ fn gen_tile_number() -> i32 {
 
 impl Board {
     pub fn new() -> Self {
-        let mut rng = rand::thread_rng();
-        let rand_start = rng.gen_range(0..16);
         let mut tile_array = [Tile { x: 0, y: 0, num: 0 }; 16];
 
         for i in 0..16 {
-            let mut current_tile = Tile {
+            let current_tile = Tile {
                 x: i % 4,
-                y: (i - i % 4) / 4,
+                y: i / 4,
                 num: 0,
             };
-            if i == rand_start {
-                let new_tile_number = gen_tile_number();
-                current_tile = Tile {
-                    x: i % 4,
-                    y: (i - i % 4) / 4,
-                    num: new_tile_number,
-                };
-            }
 
             tile_array[i as usize] = current_tile;
         }
 
-        Board {
+        let mut res = Board {
             tiles: tile_array,
             score: 0,
+        };
+
+        res.gen_new_number();
+
+        res
+    }
+
+    fn gen_new_number(&mut self) {
+        let mut rand_pos: i32;
+        loop {
+            let mut rng = rand::thread_rng();
+            rand_pos = rng.gen_range(0..16) as i32;
+
+            if self.tiles[rand_pos as usize].num < 1 {
+                break;
+            }
         }
+        let new_tile_number = gen_tile_number();
+        let current_tile = Tile {
+            x: rand_pos % 4,
+            y: (rand_pos - rand_pos % 4) / 4,
+            num: new_tile_number,
+        };
+
+        self.tiles[rand_pos as usize] = current_tile;
     }
 
     pub fn print_board(self) {
@@ -75,7 +87,7 @@ impl Board {
         }
     }
 
-    pub fn make_move(&mut self, m: Move) -> &mut Board {
+    pub fn make_move(&mut self, m: Move) {
         match m {
             Move::Up => {
                 let mut indexes = [[0; 4]; 4];
@@ -91,7 +103,7 @@ impl Board {
                     let mut index = 0;
                     for j in indexes[i] {
                         if j != 0 {
-                            let old_num = self.tiles[index * 3 + i].num;
+                            let old_num = self.tiles[index * 4 + i].num;
                             self.tiles[index * 4 + i].num = self.tiles[j - 1].num;
                             self.tiles[j - 1].num = old_num;
                             index += 1;
@@ -105,8 +117,8 @@ impl Board {
 
                 for i in 0..16 {
                     if self.tiles[i].num > 0 {
-                        indexes[(i - i % 4) / 4][ind[i % 4]] = i + 1;
-                        ind[i % 4] += 1;
+                        indexes[i / 4][ind[i / 4]] = i + 1;
+                        ind[i / 4] += 1;
                     }
                 }
 
@@ -133,6 +145,10 @@ impl Board {
                 }
 
                 for i in 0..indexes.len() {
+                    indexes[i].sort_by(|a, b| b.cmp(a));
+                }
+
+                for i in 0..indexes.len() {
                     let mut index = 3;
                     for j in indexes[i] {
                         if j != 0 {
@@ -150,9 +166,13 @@ impl Board {
 
                 for i in 0..16 {
                     if self.tiles[i].num > 0 {
-                        indexes[(i - i % 4) / 4][ind[i % 4]] = i + 1;
-                        ind[i % 4] += 1;
+                        indexes[(i - i % 4) / 4][ind[i / 4]] = i + 1;
+                        ind[i / 4] += 1;
                     }
+                }
+
+                for i in 0..indexes.len() {
+                    indexes[i].sort_by(|a, b| b.cmp(a));
                 }
 
                 for i in 0..indexes.len() {
@@ -169,6 +189,6 @@ impl Board {
             }
         }
 
-        self
+        self.gen_new_number();
     }
 }
