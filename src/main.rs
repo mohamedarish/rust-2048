@@ -9,21 +9,21 @@ fn main() {
 
     println!();
 
-    b.print_board();
-
     b.make_move(Move::Up);
 
     println!();
 
     b.print_board();
 
-    b.make_move(Move::Down);
+    b.make_move(Move::Right);
 
     println!();
 
     b.print_board();
 
-    b.make_move(Move::Right);
+    b.print_board();
+
+    b.make_move(Move::Down);
 
     println!();
 
