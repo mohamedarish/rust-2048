@@ -70,16 +70,90 @@ impl Board {
         self.tiles[rand_pos as usize] = current_tile;
     }
 
-    fn merge(&mut self, m: Move) {
+    fn merge(&mut self, m: Move) -> i32 {
+        let mut score = 0;
         match m {
-            Move::Up => {}
+            Move::Up => {
+                for i in 0..4 {
+                    let mut index = 1;
+                    loop {
+                        if self.tiles[index * 4 + i].num == 0 {
+                            index += 1;
+                        } else if self.tiles[index * 4 + i].num
+                            == self.tiles[(index + 1) * 4 + i].num
+                        {
+                            self.tiles[index * 4 + i].num *= 2;
+                            score += self.tiles[index].num;
+
+                            for j in (index + 1)..3 {
+                                self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
+                                self.tiles[(j + 1) * 4 + i].num = 0;
+                            }
+                        } else if self.tiles[(index - 1) * 4 + i].num
+                            == self.tiles[index * 4 + i].num
+                        {
+                            self.tiles[(index - 1) * 4 + i].num *= 2;
+                            score += self.tiles[(index - 1) * 4 + i].num;
+
+                            for j in index..3 {
+                                self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
+                                self.tiles[(j + 1) * 4 + i].num = 0;
+                            }
+                        } else {
+                            index += 1;
+                        }
+
+                        if index >= 3 {
+                            break;
+                        }
+                    }
+                }
+            }
             Move::Left => {}
-            Move::Down => {}
+            Move::Down => {
+                for i in 0..4 {
+                    let mut index = 1;
+                    loop {
+                        if self.tiles[index * 4 + i].num == 0 {
+                            index += 1;
+                        } else if self.tiles[index * 4 + i].num
+                            == self.tiles[(index + 1) * 4 + i].num
+                        {
+                            self.tiles[index * 4 + i].num *= 2;
+                            score += self.tiles[index].num;
+
+                            for j in ((index + 1)..3).rev() {
+                                self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
+                                self.tiles[(j + 1) * 4 + i].num = 0;
+                            }
+                        } else if self.tiles[(index - 1) * 4 + i].num
+                            == self.tiles[index * 4 + i].num
+                        {
+                            self.tiles[(index - 1) * 4 + i].num *= 2;
+                            score += self.tiles[(index - 1) * 4 + i].num;
+
+                            for j in (index..3).rev() {
+                                self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
+                                self.tiles[(j + 1) * 4 + i].num = 0;
+                            }
+                        } else {
+                            index += 1;
+                        }
+
+                        if index >= 3 {
+                            break;
+                        }
+                    }
+                }
+            }
             Move::Right => {}
         }
+
+        score
     }
 
     pub fn print_board(self) {
+        println!("\n\nscore: {}\n", self.score);
         for i in 0..4 {
             print!("|\t");
 
@@ -119,6 +193,8 @@ impl Board {
                         }
                     }
                 }
+
+                self.score = self.merge(m);
             }
             Move::Left => {
                 let mut indexes = [[0; 4]; 4];
@@ -168,6 +244,8 @@ impl Board {
                         }
                     }
                 }
+
+                self.score = self.merge(m);
             }
             Move::Right => {
                 let mut indexes = [[0; 4]; 4];
