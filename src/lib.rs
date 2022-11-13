@@ -2,8 +2,8 @@ use rand::Rng;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tile {
-    x: i32,
-    y: i32,
+    pub x: i32,
+    pub y: i32,
     pub num: i32,
 }
 
@@ -83,8 +83,9 @@ impl Board {
                             == self.tiles[(index + 1) * 4 + i].num
                         {
                             self.tiles[index * 4 + i].num *= 2;
-                            score += self.tiles[index].num;
+                            score += self.tiles[index * 4 + i].num;
 
+                            self.tiles[(index + 1) * 4 + i].num = 0;
                             for j in (index + 1)..3 {
                                 self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
                                 self.tiles[(j + 1) * 4 + i].num = 0;
@@ -95,6 +96,7 @@ impl Board {
                             self.tiles[(index - 1) * 4 + i].num *= 2;
                             score += self.tiles[(index - 1) * 4 + i].num;
 
+                            self.tiles[index * 4 + i].num = 0;
                             for j in index..3 {
                                 self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
                                 self.tiles[(j + 1) * 4 + i].num = 0;
@@ -109,32 +111,31 @@ impl Board {
                     }
                 }
             }
-            Move::Left => {}
-            Move::Down => {
+            Move::Left => {
                 for i in 0..4 {
                     let mut index = 1;
                     loop {
-                        if self.tiles[index * 4 + i].num == 0 {
-                            index += 1;
-                        } else if self.tiles[index * 4 + i].num
-                            == self.tiles[(index + 1) * 4 + i].num
+                        if self.tiles[i * 4 + index].num == 0 {
+                            index += 1
+                        } else if self.tiles[i * 4 + index].num == self.tiles[i * 4 + index + 1].num
                         {
-                            self.tiles[index * 4 + i].num *= 2;
-                            score += self.tiles[index].num;
+                            self.tiles[i * 4 + index].num *= 2;
+                            score += self.tiles[i * 4 + index].num;
 
-                            for j in ((index + 1)..3).rev() {
-                                self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
-                                self.tiles[(j + 1) * 4 + i].num = 0;
+                            self.tiles[i * 4 + index + 1].num = 0;
+                            for j in (index + 1)..3 {
+                                self.tiles[i * 4 + j].num = self.tiles[i * 4 + j + 1].num;
+                                self.tiles[i * 4 + j + 1].num = 0;
                             }
-                        } else if self.tiles[(index - 1) * 4 + i].num
-                            == self.tiles[index * 4 + i].num
+                        } else if self.tiles[i * 4 + index - 1].num == self.tiles[i * 4 + index].num
                         {
-                            self.tiles[(index - 1) * 4 + i].num *= 2;
-                            score += self.tiles[(index - 1) * 4 + i].num;
+                            self.tiles[i * 4 + index - 1].num *= 2;
+                            score += self.tiles[i * 4 + index - 1].num;
 
-                            for j in (index..3).rev() {
-                                self.tiles[j * 4 + i].num = self.tiles[(j + 1) * 4 + i].num;
-                                self.tiles[(j + 1) * 4 + i].num = 0;
+                            self.tiles[i * 4 + index].num = 0;
+                            for j in index..3 {
+                                self.tiles[i * 4 + j].num = self.tiles[i * 4 + j + 1].num;
+                                self.tiles[i * 4 + j + 1].num = 0;
                             }
                         } else {
                             index += 1;
@@ -146,10 +147,121 @@ impl Board {
                     }
                 }
             }
-            Move::Right => {}
+            Move::Down => {
+                for i in 0..4 {
+                    let mut index = 2;
+                    loop {
+                        if self.tiles[index * 4 + i].num == 0 {
+                            index -= 1;
+                        } else if self.tiles[index * 4 + i].num
+                            == self.tiles[(index + 1) * 4 + i].num
+                        {
+                            self.tiles[(index + 1) * 4 + i].num *= 2;
+                            score += self.tiles[(index + 1) * 4 + i].num;
+
+                            self.tiles[index * 4 + i].num = 0;
+                            for j in (0..index).rev() {
+                                self.tiles[(j + 1) * 4 + i].num = self.tiles[j * 4 + i].num;
+                                self.tiles[j * 4 + i].num = 0;
+                            }
+                        } else if self.tiles[index * 4 + i].num
+                            == self.tiles[(index - 1) * 4 + i].num
+                        {
+                            self.tiles[index * 4 + i].num *= 2;
+                            score += self.tiles[index * 4 + i].num;
+
+                            self.tiles[(index - 1) * 4 + i].num = 0;
+                            for j in (0..(index - 1)).rev() {
+                                self.tiles[(j + 1) * 4 + i].num = self.tiles[j * 4 + i].num;
+                                self.tiles[j * 4 + i].num = 0;
+                            }
+                        } else {
+                            index -= 1;
+                        }
+
+                        if index <= 0 {
+                            break;
+                        }
+                    }
+                }
+            }
+            Move::Right => {
+                for i in 0..4 {
+                    let mut index = 2;
+                    loop {
+                        if self.tiles[i * 4 + index].num == 0 {
+                            index -= 1;
+                        } else if self.tiles[i * 4 + index].num == self.tiles[i * 4 + index + 1].num
+                        {
+                            self.tiles[i * 4 + index + 1].num *= 2;
+                            score += self.tiles[i * 4 + index + 1].num;
+
+                            self.tiles[i * 4 + index].num = 0;
+                            for j in (0..index).rev() {
+                                self.tiles[i * 4 + j + 1].num = self.tiles[i * 4 + j].num;
+                                self.tiles[i * 4 + j].num = 0;
+                            }
+                        } else if self.tiles[i * 4 + index].num == self.tiles[i * 4 + index - 1].num
+                        {
+                            self.tiles[i * 4 + index].num *= 2;
+                            score += self.tiles[i * 4 + index].num;
+
+                            self.tiles[i * 4 + index - 1].num = 0;
+                            for j in (0..(index - 1)).rev() {
+                                self.tiles[i * 4 + j + 1].num = self.tiles[i * 4 + j].num;
+                                self.tiles[i * 4 + j].num = 0;
+                            }
+                        } else {
+                            index -= 1;
+                        }
+
+                        if index <= 0 {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         score
+    }
+
+    pub fn game_end(self) -> bool {
+        let mut left_clone = self.clone();
+
+        left_clone.make_move(Move::Left);
+
+        let mut right_clone = self.clone();
+
+        right_clone.make_move(Move::Right);
+
+        let mut up_clone = self.clone();
+
+        up_clone.make_move(Move::Up);
+
+        let mut down_clone = self.clone();
+
+        down_clone.make_move(Move::Down);
+
+        if left_clone.score == self.score
+            && right_clone.score == self.score
+            && up_clone.score == self.score
+            && down_clone.score == self.score
+        {
+            return true;
+        }
+
+        false
+    }
+
+    pub fn full_board(self) -> bool {
+        for i in self.tiles {
+            if i.num == 0 {
+                return false;
+            }
+        }
+
+        true
     }
 
     pub fn print_board(self) {
@@ -158,7 +270,6 @@ impl Board {
             print!("|\t");
 
             for j in 0..4 {
-                // println!("{} {}", i, j);
                 if self.tiles[4 * i + j].num == 0 {
                     print!(" \t|\t");
                 } else {
@@ -168,6 +279,7 @@ impl Board {
 
             println!();
         }
+        println!();
     }
 
     pub fn make_move(&mut self, m: Move) {
@@ -193,8 +305,6 @@ impl Board {
                         }
                     }
                 }
-
-                self.score = self.merge(m);
             }
             Move::Left => {
                 let mut indexes = [[0; 4]; 4];
@@ -240,12 +350,14 @@ impl Board {
                             let old_num = self.tiles[index * 4 + i].num;
                             self.tiles[index * 4 + i].num = self.tiles[j - 1].num;
                             self.tiles[j - 1].num = old_num;
-                            index -= 1;
+                            if index > 0 {
+                                index -= 1;
+                            } else {
+                                break;
+                            }
                         }
                     }
                 }
-
-                self.score = self.merge(m);
             }
             Move::Right => {
                 let mut indexes = [[0; 4]; 4];
@@ -269,13 +381,21 @@ impl Board {
                             let old_num = self.tiles[i * 4 + index].num;
                             self.tiles[i * 4 + index].num = self.tiles[j - 1].num;
                             self.tiles[j - 1].num = old_num;
-                            index -= 1;
+                            if index > 0 {
+                                index -= 1;
+                            } else {
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
 
-        self.gen_new_number();
+        self.score += self.merge(m);
+
+        if !self.full_board() {
+            self.gen_new_number();
+        }
     }
 }
