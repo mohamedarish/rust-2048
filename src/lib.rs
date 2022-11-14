@@ -1,3 +1,4 @@
+use iced::{Command, Sandbox, Theme};
 use rand::Rng;
 
 #[derive(Debug, Copy, Clone)]
@@ -13,6 +14,7 @@ pub struct Board {
     pub score: i32,
 }
 
+#[derive(Debug)]
 pub enum Move {
     Left,
     Right,
@@ -397,5 +399,25 @@ impl Board {
         if !self.full_board() {
             self.gen_new_number();
         }
+    }
+}
+
+impl Sandbox for Board {
+    type Message = Move;
+
+    fn new() -> Self {
+        Board::new()
+    }
+
+    fn title(&self) -> String {
+        String::from("2048")
+    }
+
+    fn update(&mut self, message: Self::Message) {
+        self.make_move(message);
+    }
+
+    fn view(&self) -> iced::Element<Self::Message> {
+        todo!()
     }
 }
