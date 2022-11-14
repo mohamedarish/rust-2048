@@ -1,8 +1,11 @@
+use iced::{Application, Settings};
 use rust2048::{Board, Move};
 use std::io;
 
 fn main() {
     let mut b = Board::new();
+
+    Board::run(Settings::default());
 
     b.print_board();
 
