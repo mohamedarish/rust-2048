@@ -9,4 +9,4 @@ description = "2048 made using rust, GUI is made using the iced library"
 
 [dependencies]
 rand = "0.8.5"
-iced = "0.5"
+iced = "0.5.2"

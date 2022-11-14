@@ -1,4 +1,4 @@
-use iced::{Command, Sandbox, Theme};
+use iced::Sandbox;
 use rand::Rng;
 
 #[derive(Debug, Copy, Clone)]
