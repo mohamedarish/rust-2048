@@ -1,5 +1,10 @@
-use iced::Sandbox;
+use iced::{
+    theme,
+    widget::{row, Button, Column, Container, Text},
+    Renderer, Sandbox,
+};
 use rand::Rng;
+use std::io;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tile {
@@ -14,7 +19,7 @@ pub struct Board {
     pub score: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Move {
     Left,
     Right,
@@ -406,7 +411,8 @@ impl Sandbox for Board {
     type Message = Move;
 
     fn new() -> Self {
-        Board::new()
+        let b = Board::new();
+        b
     }
 
     fn title(&self) -> String {
@@ -418,6 +424,87 @@ impl Sandbox for Board {
     }
 
     fn view(&self) -> iced::Element<Self::Message> {
-        todo!()
+        let t0: Text<'_, Renderer> = Text::new(format!(
+            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
+            self.tiles[0].num, self.tiles[1].num, self.tiles[2].num, self.tiles[3].num
+        ));
+        let t1: Text<'_, Renderer> = Text::new(format!(
+            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
+            self.tiles[4].num, self.tiles[5].num, self.tiles[6].num, self.tiles[7].num
+        ));
+        let t2: Text<'_, Renderer> = Text::new(format!(
+            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
+            self.tiles[8].num, self.tiles[9].num, self.tiles[10].num, self.tiles[11].num
+        ));
+        let t3: Text<'_, Renderer> = Text::new(format!(
+            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
+            self.tiles[12].num, self.tiles[13].num, self.tiles[14].num, self.tiles[15].num
+        ));
+
+        let bl = Button::new("Left")
+            .on_press(Move::Left)
+            .style(theme::Button::Secondary);
+        let br: Button<'_, Move, Renderer> = Button::new("Right")
+            .on_press(Move::Right)
+            .style(theme::Button::Primary);
+        let bu: Button<'_, Move, Renderer> = Button::new("Up")
+            .on_press(Move::Up)
+            .style(theme::Button::Positive);
+        let bd: Button<'_, Move, Renderer> = Button::new("Down")
+            .on_press(Move::Down)
+            .style(theme::Button::Destructive);
+
+        let lrb = row!(bl, br).spacing(50);
+
+        let col1 = Column::new()
+            .push(t0)
+            .push(t1)
+            .push(t2)
+            .push(t3)
+            .push(bu)
+            .push(lrb)
+            .push(bd)
+            .spacing(50)
+            .align_items(iced::Alignment::Fill);
+
+        let layout = Container::new(col1)
+            .center_x()
+            .center_y()
+            .height(iced::Length::Shrink);
+
+        layout.into()
+    }
+}
+
+pub fn game_loop(b: &mut Board) {
+    b.print_board();
+
+    loop {
+        println!("Enter your choice (w=up, a=left, s=down, d=right, q=quit): ");
+
+        let mut inp = String::new();
+
+        io::stdin()
+            .read_line(&mut inp)
+            .expect("Failed to read the input");
+
+        match inp.as_ref() {
+            "w\n" => b.make_move(Move::Up),
+            "a\n" => b.make_move(Move::Left),
+            "s\n" => b.make_move(Move::Down),
+            "d\n" => b.make_move(Move::Right),
+            "q\n" => break,
+            _ => {
+                println!("Invalid input");
+                continue;
+            }
+        }
+
+        b.print_board();
+
+        if b.game_end() && b.full_board() {
+            println!("Game over, score: {}", b.score);
+            break;
+        }
     }
 }
