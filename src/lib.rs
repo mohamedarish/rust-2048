@@ -1,7 +1,7 @@
 use iced::{
     theme,
-    widget::{row, Button, Column, Container, Text},
-    Renderer, Sandbox,
+    widget::{container, row, Button, Column, Text},
+    Color, Renderer, Sandbox,
 };
 use rand::Rng;
 use std::io;
@@ -25,6 +25,7 @@ pub enum Move {
     Right,
     Up,
     Down,
+    Restart,
 }
 
 fn gen_tile_number() -> i32 {
@@ -55,6 +56,12 @@ impl Board {
         res.gen_new_number();
 
         res
+    }
+
+    pub fn reset_board(&mut self) {
+        for i in 0..16 {
+            self.tiles[i].num = 0;
+        }
     }
 
     fn gen_new_number(&mut self) {
@@ -228,6 +235,9 @@ impl Board {
                     }
                 }
             }
+            Move::Restart => {
+                score = -self.score;
+            }
         }
 
         score
@@ -397,6 +407,9 @@ impl Board {
                     }
                 }
             }
+            Move::Restart => {
+                self.reset_board();
+            }
         }
 
         self.score += self.merge(m);
@@ -405,6 +418,50 @@ impl Board {
             self.gen_new_number();
         }
     }
+}
+
+fn text_matcher(text: i32) -> Text<'static, Renderer> {
+    let res: Text<'_, Renderer> = match text {
+        0 => Text::new(" ").size(30),
+        _ => Text::new(format!("{}", text))
+            .style(theme::Text::Color(Color::from_rgb(0.0, 0.0, 0.0)))
+            .size(30),
+    };
+
+    res
+}
+
+fn button_matcher(text: Text<'_, Renderer>, number: i32) -> Button<'_, Move, Renderer> {
+    let res: Button<'_, Move, Renderer> = match number {
+        2 => Button::new(text)
+            .style(theme::Button::Secondary)
+            .padding(60),
+        4 => Button::new(text)
+            .style(theme::Button::Destructive)
+            .padding(60),
+        8 => Button::new(text).style(theme::Button::Primary).padding(60),
+        16 => Button::new(text)
+            .style(theme::Button::Destructive)
+            .padding(60),
+        32 => Button::new(text)
+            .style(theme::Button::Secondary)
+            .padding(60),
+        64 => Button::new(text).style(theme::Button::Primary).padding(60),
+        128 => Button::new(text)
+            .style(theme::Button::Destructive)
+            .padding(60),
+        256 => Button::new(text)
+            .style(theme::Button::Secondary)
+            .padding(60),
+        512 => Button::new(text).style(theme::Button::Primary).padding(60),
+        1024 => Button::new(text)
+            .style(theme::Button::Destructive)
+            .padding(60),
+        2048 => Button::new(text).style(theme::Button::Primary).padding(60),
+        _ => Button::new(text).style(theme::Button::Positive).padding(60),
+    };
+
+    res
 }
 
 impl Sandbox for Board {
@@ -424,55 +481,117 @@ impl Sandbox for Board {
     }
 
     fn view(&self) -> iced::Element<Self::Message> {
-        let t0: Text<'_, Renderer> = Text::new(format!(
-            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
-            self.tiles[0].num, self.tiles[1].num, self.tiles[2].num, self.tiles[3].num
-        ));
-        let t1: Text<'_, Renderer> = Text::new(format!(
-            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
-            self.tiles[4].num, self.tiles[5].num, self.tiles[6].num, self.tiles[7].num
-        ));
-        let t2: Text<'_, Renderer> = Text::new(format!(
-            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
-            self.tiles[8].num, self.tiles[9].num, self.tiles[10].num, self.tiles[11].num
-        ));
-        let t3: Text<'_, Renderer> = Text::new(format!(
-            "|\t{}\t|\t{}\t|\t{}\t{}\t|",
-            self.tiles[12].num, self.tiles[13].num, self.tiles[14].num, self.tiles[15].num
-        ));
+        let row1 = row!(
+            button_matcher(text_matcher(self.tiles[0].num), self.tiles[0].num),
+            button_matcher(text_matcher(self.tiles[1].num), self.tiles[1].num),
+            button_matcher(text_matcher(self.tiles[3].num), self.tiles[3].num),
+            button_matcher(text_matcher(self.tiles[2].num), self.tiles[2].num),
+        )
+        .padding(5)
+        .spacing(10);
+        let row2 = row!(
+            button_matcher(text_matcher(self.tiles[4].num), self.tiles[4].num),
+            button_matcher(text_matcher(self.tiles[5].num), self.tiles[5].num),
+            button_matcher(text_matcher(self.tiles[6].num), self.tiles[6].num),
+            button_matcher(text_matcher(self.tiles[7].num), self.tiles[7].num),
+        )
+        .padding(5)
+        .spacing(10);
+        let row3 = row!(
+            button_matcher(text_matcher(self.tiles[8].num), self.tiles[8].num),
+            button_matcher(text_matcher(self.tiles[9].num), self.tiles[9].num),
+            button_matcher(text_matcher(self.tiles[10].num), self.tiles[10].num),
+            button_matcher(text_matcher(self.tiles[11].num), self.tiles[11].num),
+        )
+        .padding(5)
+        .spacing(10);
+        let row4 = row!(
+            button_matcher(text_matcher(self.tiles[12].num), self.tiles[12].num),
+            button_matcher(text_matcher(self.tiles[13].num), self.tiles[13].num),
+            button_matcher(text_matcher(self.tiles[14].num), self.tiles[14].num),
+            button_matcher(text_matcher(self.tiles[15].num), self.tiles[15].num),
+        )
+        .padding(5)
+        .spacing(10);
 
         let bl = Button::new("Left")
             .on_press(Move::Left)
-            .style(theme::Button::Secondary);
+            .style(theme::Button::Secondary)
+            .padding(10);
         let br: Button<'_, Move, Renderer> = Button::new("Right")
             .on_press(Move::Right)
-            .style(theme::Button::Primary);
+            .style(theme::Button::Primary)
+            .padding(10);
         let bu: Button<'_, Move, Renderer> = Button::new("Up")
             .on_press(Move::Up)
-            .style(theme::Button::Positive);
+            .style(theme::Button::Positive)
+            .padding(10);
         let bd: Button<'_, Move, Renderer> = Button::new("Down")
             .on_press(Move::Down)
-            .style(theme::Button::Destructive);
+            .style(theme::Button::Destructive)
+            .padding(10);
 
-        let lrb = row!(bl, br).spacing(50);
+        let u = row!(bu);
+        let lrb = row!(bl, br);
+        let d = row!(bd);
+
+        let col = Column::new()
+            .push(u)
+            .push(lrb)
+            .push(d)
+            .align_items(iced::Alignment::Center);
+
+        let score: Text<'_, Renderer> = Text::new(format!("score: {}", self.score)).size(64);
+
+        let restart: Button<'_, Move, Renderer> = Button::new("Restart")
+            .padding(10)
+            .style(theme::Button::Destructive)
+            .on_press(Move::Restart);
+
+        let game_board = Column::new()
+            .push(row1)
+            .push(row2)
+            .push(row3)
+            .push(row4)
+            .align_items(iced::Alignment::Center);
 
         let col1 = Column::new()
-            .push(t0)
-            .push(t1)
-            .push(t2)
-            .push(t3)
-            .push(bu)
-            .push(lrb)
-            .push(bd)
-            .spacing(50)
-            .align_items(iced::Alignment::Fill);
+            .push(game_board)
+            .push(col)
+            .push(score)
+            .push(restart)
+            .align_items(iced::Alignment::Center)
+            .spacing(10)
+            .padding(20);
 
-        let layout = Container::new(col1)
-            .center_x()
-            .center_y()
-            .height(iced::Length::Shrink);
+        let restart2: Button<'_, Move, Renderer> = Button::new("Play again")
+            .padding(10)
+            .style(theme::Button::Primary)
+            .on_press(Move::Restart);
 
-        layout.into()
+        let game_over: Text<'_, Renderer> = Text::new("Game Over");
+
+        let col2 = Column::new()
+            .push(game_over)
+            .push(restart2)
+            .align_items(iced::Alignment::Center)
+            .spacing(10);
+
+        if !self.game_end() || !self.full_board() {
+            container(col1)
+                .width(iced::Length::Fill)
+                .height(iced::Length::Fill)
+                .center_x()
+                .center_y()
+                .into()
+        } else {
+            container(col2)
+                .width(iced::Length::Fill)
+                .height(iced::Length::Fill)
+                .center_x()
+                .center_y()
+                .into()
+        }
     }
 }
 
@@ -493,7 +612,7 @@ pub fn game_loop(b: &mut Board) {
             "a\n" => b.make_move(Move::Left),
             "s\n" => b.make_move(Move::Down),
             "d\n" => b.make_move(Move::Right),
-            "q\n" => break,
+            "q\n" => b.make_move(Move::Restart),
             _ => {
                 println!("Invalid input");
                 continue;
