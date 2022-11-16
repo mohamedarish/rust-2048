@@ -181,3 +181,46 @@ fn functionality_test() {
 
     assert_eq!((lu, ru, ld, rd), (true, true, true, true))
 }
+
+#[test]
+fn test_game_end() {
+    let new_board = Board {
+        tiles: [
+            Tile { x: 0, y: 0, num: 2 },
+            Tile { x: 1, y: 0, num: 4 },
+            Tile { x: 2, y: 0, num: 8 },
+            Tile {
+                x: 3,
+                y: 0,
+                num: 16,
+            },
+            Tile {
+                x: 0,
+                y: 1,
+                num: 16,
+            },
+            Tile { x: 1, y: 1, num: 8 },
+            Tile { x: 2, y: 1, num: 4 },
+            Tile { x: 3, y: 1, num: 2 },
+            Tile { x: 0, y: 2, num: 2 },
+            Tile { x: 1, y: 2, num: 4 },
+            Tile { x: 2, y: 2, num: 8 },
+            Tile {
+                x: 3,
+                y: 2,
+                num: 16,
+            },
+            Tile {
+                x: 0,
+                y: 3,
+                num: 16,
+            },
+            Tile { x: 1, y: 3, num: 8 },
+            Tile { x: 2, y: 3, num: 4 },
+            Tile { x: 3, y: 3, num: 2 },
+        ],
+        score: 0,
+    };
+
+    assert!(new_board.game_end())
+}
